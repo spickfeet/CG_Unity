@@ -3,7 +3,7 @@ using System.Collections;
 
 public class RayShooter : MonoBehaviour
 {
-
+    [SerializeField] private GameObject _hitMarkerPrefab;
     [SerializeField] private float _fireRate;
     [SerializeField] private Camera _camera;
     [SerializeField] private AudioClip _shotSFX;
@@ -49,9 +49,10 @@ public class RayShooter : MonoBehaviour
 
     private IEnumerator SphereIndicator(Vector3 pos)
     {
-        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.position = pos;
+        GameObject _hitMarker;
+        _hitMarker = Instantiate(_hitMarkerPrefab);
+        _hitMarker.transform.position = pos;
         yield return new WaitForSeconds(1);
-        Destroy(sphere);
+        Destroy(_hitMarker);
     }
 }
