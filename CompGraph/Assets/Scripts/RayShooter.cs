@@ -3,6 +3,8 @@ using System.Collections;
 
 public class RayShooter : MonoBehaviour
 {
+    [SerializeField] private ParticleSystem _fireEffectPrefab;
+    [SerializeField] private Transform _effectSpawn;
     [SerializeField] private GameObject _hitMarkerPrefab;
     [SerializeField] private float _fireRate;
     [SerializeField] private Camera _camera;
@@ -29,6 +31,10 @@ public class RayShooter : MonoBehaviour
     private void Shoot()
     {
          _audioSource.PlayOneShot(_shotSFX);
+
+        _fireEffectPrefab.Play();
+
+
          Vector3 point = new Vector3(_camera.pixelWidth / 2, _camera.pixelHeight / 2, 0);
          Ray ray = _camera.ScreenPointToRay(point);
         RaycastHit hit;
