@@ -10,6 +10,9 @@ public class RayShooter : MonoBehaviour
     [SerializeField] private Camera _camera;
     [SerializeField] private AudioClip _shotSFX;
     [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private GameObject _tracerPr;
+    [SerializeField] private float _spread;
+
     private float _nextFire = 0;
     void Start()
     {
@@ -30,35 +33,47 @@ public class RayShooter : MonoBehaviour
 
     private void Shoot()
     {
-         _audioSource.PlayOneShot(_shotSFX);
-
+        _audioSource.PlayOneShot(_shotSFX);
+        
         _fireEffectPrefab.Play();
 
-
-         Vector3 point = new Vector3(_camera.pixelWidth / 2, _camera.pixelHeight / 2, 0);
-         Ray ray = _camera.ScreenPointToRay(point);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(this.transform.position, new Vector3(Random.Range(-_spread, _spread), Random.Range(-_spread, _spread), Random.Range(-_spread, _spread)) + this.transform.forward, out hit))
         {
             GameObject hitObject = hit.transform.gameObject;
             ReactiveTarget target = hitObject.GetComponent<ReactiveTarget>();
             if (target != null)
             {
+                StartCoroutine(Tracer(hit.point));
                 target.ReactHit();
+                StartCoroutine(EffectIndicator(hit.point));
             }
             else
             {
-                StartCoroutine(SphereIndicator(hit.point));
+                StartCoroutine(Tracer(hit.point));
+                StartCoroutine(EffectIndicator(hit.point));
             }
         }
     }
 
-    private IEnumerator SphereIndicator(Vector3 pos)
+    private IEnumerator EffectIndicator(Vector3 pos)
     {
-        GameObject _hitMarker;
-        _hitMarker = Instantiate(_hitMarkerPrefab);
-        _hitMarker.transform.position = pos;
-        yield return new WaitForSeconds(1);
-        Destroy(_hitMarker);
+        GameObject hitMarker;
+        hitMarker = Instantiate(_hitMarkerPrefab);
+        hitMarker.transform.position = pos;
+        yield return new WaitForSeconds(0.01f);
+        Destroy(hitMarker);
+    }
+    private IEnumerator Tracer(Vector3 pos)
+    {
+        GameObject t = Instantiate(_tracerPr);
+        t.transform.position = new Vector3();
+        LineRenderer tracer = t.GetComponent<LineRenderer>();
+        tracer.startWidth = 0.05f;
+        tracer.endWidth = 0.05f;
+        tracer.SetPosition(0, _effectSpawn.position);
+        tracer.SetPosition(1, pos);
+        yield return new WaitForSeconds(0.02f);
+        Destroy(t);
     }
 }
