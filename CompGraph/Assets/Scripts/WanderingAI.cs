@@ -5,9 +5,10 @@ using UnityEngine.UIElements;
 
 public class WanderingAI : MonoBehaviour
 {
-    [SerializeField] public float speed = 3.0f;
-    [SerializeField] public float obstacleRange = 5.0f;
+    [SerializeField] private float _speed = 3.0f;
+    [SerializeField] private float _obstacleRange = 5.0f;
     [SerializeField] private GameObject _fireballPrefab;
+    private const float BASE_SPEED = 3.0f;
     private GameObject _fireball;
     private bool _alive;
     public bool Alive
@@ -17,12 +18,20 @@ public class WanderingAI : MonoBehaviour
     void Start()
     {
         _alive = true;
-}
+    }
+    void Awake()
+    {
+        Messenger<float>.AddListener(GameEvent.SPEED_CHANGED, OnSpeedChanged);
+    }
+    void OnDestroy()
+    {
+        Messenger<float>.RemoveListener(GameEvent.SPEED_CHANGED, OnSpeedChanged);
+    }
     void Update()
     {
         if (_alive)
         {
-            transform.Translate(0, 0, speed * Time.deltaTime);
+            transform.Translate(0, 0, _speed * Time.deltaTime);
             Ray ray = new Ray(transform.position, transform.forward);
             RaycastHit hit;
             if (Physics.SphereCast(ray, 0.75f, out hit))
@@ -37,13 +46,16 @@ public class WanderingAI : MonoBehaviour
                         _fireball.transform.rotation = transform.rotation;
                     }
                 }
-                if (hit.distance < obstacleRange)
+                if (hit.distance < _obstacleRange)
                 {
                     float angle = Random.Range(-110, 110);
                     transform.Rotate(0, angle, 0);
                 }
             }
-
         }
+    }
+    private void OnSpeedChanged(float value)
+    {
+        _speed = BASE_SPEED * value;
     }
 }

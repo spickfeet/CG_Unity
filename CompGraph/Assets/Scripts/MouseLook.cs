@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 public class MouseLook : MonoBehaviour
 {
+    [SerializeField] private Joystick _joystick;
     public enum RotationAxes
     {
         MouseXAndY = 0,
@@ -14,6 +15,16 @@ public class MouseLook : MonoBehaviour
     public float minimumVert = -45.0f;
     public float maximumVert = 45.0f;
     private float _rotationX = 0;
+
+    void Awake()
+    {
+        Messenger<float>.AddListener(GameEvent.SENSITIVITY_CHANGED, OnSensitivityChanged);
+    }
+    void OnDestroy()
+    {
+        Messenger<float>.RemoveListener(GameEvent.SENSITIVITY_CHANGED, OnSensitivityChanged);
+    }
+
     void Start()
     {
         Rigidbody body = GetComponent<Rigidbody>();
@@ -24,11 +35,11 @@ public class MouseLook : MonoBehaviour
     {
         if (axes == RotationAxes.MouseX)
         {
-            transform.Rotate(0, Input.GetAxis("Mouse X") * sensitivityHor, 0);
+            transform.Rotate(0, _joystick.Horizontal * sensitivityHor, 0);
         }
         else if (axes == RotationAxes.MouseY)
         {
-            _rotationX -= Input.GetAxis("Mouse Y") * sensitivityVert;
+            _rotationX -= _joystick.Vertical * sensitivityVert;
             _rotationX = Mathf.Clamp(_rotationX, minimumVert, maximumVert);
             float rotationY = transform.localEulerAngles.y;
             transform.localEulerAngles = new Vector3(_rotationX, rotationY, 0);
@@ -41,5 +52,10 @@ public class MouseLook : MonoBehaviour
             float rotationY = transform.localEulerAngles.y + delta;
             transform.localEulerAngles = new Vector3(_rotationX, rotationY, 0);
         }
+    }
+    private void OnSensitivityChanged(float value)
+    {
+        sensitivityHor = value;
+        sensitivityVert = value;
     }
 }

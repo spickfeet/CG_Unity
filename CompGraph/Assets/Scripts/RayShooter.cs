@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
 
 public class RayShooter : MonoBehaviour
 {
@@ -12,29 +14,44 @@ public class RayShooter : MonoBehaviour
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private GameObject _tracerPr;
     [SerializeField] private float _spread;
+    private bool _shootStatus = false;
 
     private float _nextFire = 0;
+
+    public void ShootStart()
+    {
+        _shootStatus = true;
+    }
+    public void ShootStop()
+    {
+        _shootStatus = false;
+    }
+
     void Start()
     {
         _camera = GetComponent<Camera>();
     }
     void Update()
     {
-        if(Input.GetMouseButton(0) && Time.time > _nextFire)
+        if (Input.GetMouseButtonDown(0))
+            EventSystem.current.IsPointerOverGameObject();
+        if (_shootStatus == true && Time.time > _nextFire)
         {
             _nextFire = Time.time + 1 / _fireRate;
             Shoot();
         }
     }
+
+
     private void FixedUpdate()
     {          
     }
 
 
     private void Shoot()
-    {
+    {        
         _audioSource.PlayOneShot(_shotSFX);
-        
+
         _fireEffectPrefab.Play();
 
         RaycastHit hit;
@@ -46,6 +63,7 @@ public class RayShooter : MonoBehaviour
             {
                 StartCoroutine(Tracer(hit.point));
                 target.ReactHit();
+                Messenger.Broadcast(GameEvent.ENEMY_HIT);
                 StartCoroutine(EffectIndicator(hit.point));
             }
             else
@@ -54,6 +72,7 @@ public class RayShooter : MonoBehaviour
                 StartCoroutine(EffectIndicator(hit.point));
             }
         }
+
     }
 
     private IEnumerator EffectIndicator(Vector3 pos)

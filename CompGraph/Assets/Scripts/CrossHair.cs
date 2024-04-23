@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class CrossHair : MonoBehaviour
 {
@@ -8,8 +9,6 @@ public class CrossHair : MonoBehaviour
     void Start()
     {
         _camera = GetComponent<Camera>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
     void OnGUI()
     {
@@ -21,6 +20,5 @@ public class CrossHair : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
     }
 }
